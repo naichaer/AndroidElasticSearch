@@ -9,8 +9,14 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+
 import ca.ualberta.ssrg.androidelasticsearch.R;
 
 public class MainActivity extends Activity {
@@ -20,8 +26,10 @@ public class MainActivity extends Activity {
 	private ArrayAdapter<Movie> moviesViewAdapter;
 	private ESMovieManager movieManager;
 	private MoviesController moviesController;
-
+	public Button search;
 	private Context mContext = this;
+	private String searchName;
+	public Movie searchMovie;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +52,7 @@ public class MainActivity extends Activity {
 		movieList.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int pos,	long id) {
+			public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
 				int movieId = movies.get(pos).getId();
 				startDetailsActivity(movieId);
 			}
@@ -65,15 +73,22 @@ public class MainActivity extends Activity {
 				return true;
 			}
 		});
+
+
+		//search movie
+
+
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
 		
-		
-		SearchThread thread = new SearchThread("*");
+		//You can not access the network from the gui thread
+		//So, let us create anothher thread to do that work
+		//If we try to use the gui thread -- the gui will stop and wait
 
+		SearchThread thread = new SearchThread("*");
 		thread.start();
 
 
@@ -101,11 +116,33 @@ public class MainActivity extends Activity {
 		movies.clear();
 
 		// TODO: Extract search query from text view
-		
+		//search = (Button) findViewById(R.id.button1);
+
+		TextView editText = (TextView)findViewById(R.id.editText1);
+		/*search.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				searchName = editText.getText().toString();
+			}
+		});
+		*/
+
+		String queryText = editText.getText().toString();
+
 		// TODO: Run the search thread
-		
+		/*for(Movie m: movies){
+			if (m.getTitle() == searchName){
+				startDetailsActivity(m.getId());
+			}
+		}
+		*/
+
+		SearchThread thread = new SearchThread(queryText);
+		thread.start();
+
+
 	}
-	
+
 	/**
 	 * Starts activity with details for a movie
 	 * @param movieId Movie id
